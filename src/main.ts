@@ -78,16 +78,10 @@ async function run() {
 
     await exec.exec(`${emsdk} activate ${emArgs.version}`);
     const envListener = (message) => {
-      const pathResult = pathRegex.exec(message);
-
-      if (pathResult) {
-        core.addPath(pathResult[1]);
-        return;
-      }
-
       const envResult = envRegex.exec(message);
 
-      if (envResult) {
+      if (envResult && envResult[1] != "PATH") {
+        console.log(`export ${envResult[1]}, ${envResult[2]}`)
         core.exportVariable(envResult[1], envResult[2]);
         return;
       }
@@ -99,7 +93,7 @@ async function run() {
       await io.cp(path.join(emsdkFolder, 'emsdk-main'), path.join(process.env.GITHUB_WORKSPACE, emArgs.actionsCacheFolder), { recursive: true })
       await cache.saveCache([emArgs.actionsCacheFolder], cacheKey);
     }
-  } catch (error) {
+  } catch (error: any) {
     core.setFailed(error.message);
   }
 }
